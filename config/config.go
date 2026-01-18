@@ -8,14 +8,14 @@ import (
 )
 
 type Config struct {
-	AppName  string
-	AppPort  string
-	AppEnv   string
-	DBHost   string
-	DBPort   string
-	DBName   string
-	DBUser   string
-	DBPass   string
+	AppName   string
+	AppPort   string
+	AppEnv    string
+	DBHost    string
+	DBPort    string
+	DBName    string
+	DBUser    string
+	DBPass    string
 	JWTSecret string
 	JWTExpiry time.Duration
 }
@@ -35,10 +35,10 @@ func LoadConfig() error {
 		AppPort:   getEnv("APP_PORT", "3000"),
 		AppEnv:    getEnv("APP_ENV", "development"),
 		DBHost:    getEnv("DB_HOST", "127.0.0.1"),
-		DBPort:    getEnv("DB_PORT", "3306"),
+		DBPort:    getEnv("DB_PORT", "5432"),
 		DBName:    getEnv("DB_DATABASE", "mbkm"),
-		DBUser:    getEnv("DB_USERNAME", "root"),
-		DBPass:    getEnv("DB_PASSWORD", ""),
+		DBUser:    getEnv("DB_USERNAME", "ridho"),
+		DBPass:    getEnv("DB_PASSWORD", "ridho"),
 		JWTSecret: getEnv("JWT_SECRET", "your-secret-key"),
 		JWTExpiry: expiry,
 	}

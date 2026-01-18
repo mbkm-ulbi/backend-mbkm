@@ -51,6 +51,13 @@ func Migrate() error {
 		&models.ApplyJob{},
 		&models.Report{},
 		&models.Evaluation{},
+		&models.ActivityDetail{},
+		&models.BobotNilai{},
+		&models.KonversiNilai{},
+		&models.Fakultas{},
+		&models.ProgramStudi{},
+		&models.MataKuliah{},
+		&models.Perusahaan{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)

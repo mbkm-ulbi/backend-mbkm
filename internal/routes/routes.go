@@ -13,6 +13,8 @@ func SetupRoutes(app *fiber.App) {
 	jobHandler := handlers.NewJobHandler()
 	articleHandler := handlers.NewArticleHandler()
 	companyHandler := handlers.NewCompanyHandler()
+	dashboardHandler := handlers.NewDashboardHandler()
+	applyJobHandler := handlers.NewApplyJobHandler()
 
 	// API v1 routes
 	api := app.Group("/api/v1")
@@ -72,7 +74,7 @@ func SetupRoutes(app *fiber.App) {
 	protectedArticles.Put("/:id", articleHandler.Update)
 	protectedArticles.Delete("/:id", articleHandler.Destroy)
 
-	// Companies
+	// Companies (Job Providers - Complex Entity)
 	protectedCompanies := protected.Group("/companies")
 	protectedCompanies.Get("", companyHandler.Index)
 	protectedCompanies.Get("/:id", companyHandler.Show)
@@ -80,31 +82,105 @@ func SetupRoutes(app *fiber.App) {
 	protectedCompanies.Put("/:id", companyHandler.Update)
 	protectedCompanies.Delete("/:id", companyHandler.Destroy)
 
-	// Dashboard (placeholder)
-	protected.Get("/dashboard/overview", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"message": "Dashboard overview - to be implemented",
-		})
-	})
+	// --- Master Data Routes ---
 
-	// Permissions (placeholder)
-	protected.Get("/permissions", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": []interface{}{}, "count": 0})
-	})
+	// Fakultas
+	protected.Get("/fakultas", handlers.GetFakultas)
 
-	// Roles (placeholder)
-	protected.Get("/roles", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": []interface{}{}, "count": 0})
-	})
+	// Program Studi
+	protected.Get("/program-studi", handlers.GetProgramStudi)
 
-	// Users (placeholder)
-	protected.Get("/users", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": []interface{}{}, "count": 0})
-	})
-	protected.Get("/users/lecturer", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": []interface{}{}, "count": 0})
-	})
-	protected.Get("/users/student", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"data": []interface{}{}, "count": 0})
-	})
+	// Mata Kuliah
+	protected.Get("/matkul", handlers.GetMatkul)
+
+	// Perusahaan (Simple Master Data)
+	protectedPerusahaan := protected.Group("/perusahaans")
+	protectedPerusahaan.Get("", handlers.GetPerusahaan)
+	protectedPerusahaan.Post("", handlers.CreatePerusahaan)
+	protectedPerusahaan.Get("/:id", handlers.GetPerusahaanDetail)
+	protectedPerusahaan.Put("/:id", handlers.UpdatePerusahaan)
+	protectedPerusahaan.Delete("/:id", handlers.DeletePerusahaan)
+
+	// Apply Jobs
+	protectedApplyJobs := protected.Group("/apply-jobs")
+	protectedApplyJobs.Get("", applyJobHandler.Index)
+	protectedApplyJobs.Get("/:id", applyJobHandler.Show)
+	protectedApplyJobs.Post("", applyJobHandler.Store)
+	protectedApplyJobs.Put("/:id", applyJobHandler.Update)
+	protectedApplyJobs.Delete("/:id", applyJobHandler.Destroy)
+	protectedApplyJobs.Post("/:id/approve", applyJobHandler.Approve)
+	protectedApplyJobs.Post("/:id/reject", applyJobHandler.Reject)
+	protectedApplyJobs.Post("/:id/activate", applyJobHandler.Activate)
+	protectedApplyJobs.Post("/:id/done", applyJobHandler.Done)
+	protectedApplyJobs.Post("/:id/set-lecturer", applyJobHandler.SetLecturer)
+	protectedApplyJobs.Get("/user/:user_id", applyJobHandler.GetByUser)
+
+	// Dashboard
+	protected.Get("/dashboard/overview", dashboardHandler.Overview)
+
+	// Permissions
+	protected.Get("/permissions", handlers.GetPermissions)
+	protected.Post("/permissions", handlers.CreatePermission)
+	protected.Put("/permissions/:id", handlers.UpdatePermission)
+	protected.Delete("/permissions/:id", handlers.DeletePermission)
+
+	// Roles
+	protected.Get("/roles", handlers.GetRoles)
+	protected.Post("/roles", handlers.CreateRole)
+	protected.Get("/roles/:id", handlers.GetRoleDetail)
+	protected.Put("/roles/:id", handlers.UpdateRole)
+	protected.Delete("/roles/:id", handlers.DeleteRole)
+	protected.Post("/roles/assign", handlers.AssignRole)
+
+	// Users
+	protected.Get("/users", handlers.GetUsers)
+	protected.Post("/users", handlers.CreateUser)
+	protected.Get("/users/:id", handlers.GetUserDetail)
+	protected.Put("/users/:id", handlers.UpdateUser)
+	protected.Delete("/users/:id", handlers.DeleteUser)
+
+	// Special User Filters
+	protected.Get("/lecturers", handlers.GetLecturers)
+	protected.Get("/students", handlers.GetStudents)
+
+	// --- Academic Features ---
+
+	// Reports
+	protectedReports := protected.Group("/reports")
+	protectedReports.Get("", handlers.GetReports)
+	protectedReports.Post("", handlers.CreateReport)
+	protectedReports.Get("/:id", handlers.GetReportDetail) // ID is ApplyJobID
+	protectedReports.Post("/:id/check", handlers.CheckReport)
+	protectedReports.Delete("/:id", handlers.DeleteReport)
+
+	// Activity Details
+	protectedActivities := protected.Group("/activity-details")
+	protectedActivities.Get("", handlers.GetActivityDetails)
+	protectedActivities.Post("", handlers.CreateActivityDetail)
+	protectedActivities.Get("/:id", handlers.GetActivityDetail)
+	protectedActivities.Put("/:id", handlers.UpdateActivityDetail)
+	protectedActivities.Delete("/:id", handlers.DeleteActivityDetail)
+
+	// Evaluations
+	protectedEvaluations := protected.Group("/evaluations")
+	protectedEvaluations.Get("", handlers.GetEvaluations)
+	protectedEvaluations.Post("", handlers.UpdateEvaluation)       // Store/Update Logic combined
+	protectedEvaluations.Get("/:id", handlers.GetEvaluationDetail) // ID is ApplyJobID
+
+	// Konversi Nilai
+	protectedKonversi := protected.Group("/konversi-nilai")
+	protectedKonversi.Get("", handlers.GetKonversiNilai)
+	protectedKonversi.Post("", handlers.CreateKonversiNilai)
+	protectedKonversi.Get("/:id", handlers.GetKonversiNilaiDetail)
+	protectedKonversi.Put("/:id", handlers.UpdateKonversiNilai)
+	protectedKonversi.Delete("/:id", handlers.DeleteKonversiNilai)
+
+	// --- Utilities ---
+
+	// Settings (Bobot Nilai)
+	protected.Get("/settings/bobot-nilai", handlers.GetBobotNilai)
+	protected.Post("/settings/bobot-nilai", handlers.UpdateBobotNilai)
+
+	// Import
+	protected.Post("/import/student", handlers.ImportStudents)
 }

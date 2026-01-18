@@ -57,18 +57,3 @@ type ApplyJobMonthlyLog struct {
 func (ApplyJobMonthlyLog) TableName() string {
 	return "apply_job_monthly_logs"
 }
-
-type KonversiNilai struct {
-	ID         uint           `gorm:"primaryKey" json:"id"`
-	ApplyJobID uint           `json:"apply_job_id"`
-	MataKuliah *string        `gorm:"size:255" json:"mata_kuliah,omitempty"`
-	SKS        *int           `json:"sks,omitempty"`
-	Nilai      *string        `gorm:"size:10" json:"nilai,omitempty"`
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
-	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
-}
-
-func (KonversiNilai) TableName() string {
-	return "konversi_nilais"
-}
